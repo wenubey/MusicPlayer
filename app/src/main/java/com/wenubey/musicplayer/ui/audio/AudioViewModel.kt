@@ -17,6 +17,7 @@ import com.wenubey.musicplayer.utils.formatDuration
 import com.wenubey.musicplayer.player.service.MusicPlayerServiceHandler
 import com.wenubey.musicplayer.player.service.MusicPlayerState
 import com.wenubey.musicplayer.player.service.PlayerEvent
+import com.wenubey.musicplayer.utils.Utils.fakeAudio
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -138,11 +139,5 @@ class AudioViewModel @Inject constructor(
         super.onCleared()
     }
 
-
-    companion object {
-        private val fakeAudio = Audio(
-            "".toUri(), "", 0L, "", "", 0, ""
-        )
-    }
 }
 

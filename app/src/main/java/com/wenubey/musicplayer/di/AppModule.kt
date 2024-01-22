@@ -78,6 +78,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideServiceHandler(exoPlayer: ExoPlayer): MusicPlayerServiceHandler =
-        MusicPlayerServiceHandler(exoPlayer)
+    fun provideServiceHandler(exoPlayer: ExoPlayer, @MainDispatcher mainDispatcher: CoroutineDispatcher): MusicPlayerServiceHandler =
+        MusicPlayerServiceHandler(exoPlayer, mainDispatcher)
 }
