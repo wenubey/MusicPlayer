@@ -7,6 +7,8 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.wenubey.musicplayer.di.AppModule.MainDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,7 +46,7 @@ class MusicPlayerServiceHandler @Inject constructor(
 
 
 
-    suspend fun onPlayerEvent(
+     suspend fun onPlayerEvent(
         playerEvent: PlayerEvent,
         selectedAudioIndex: Int = -1,
         seekPosition: Long = 0,
@@ -82,7 +84,7 @@ class MusicPlayerServiceHandler @Inject constructor(
         }
     }
 
-    private fun playOrPause() {
+    private suspend fun playOrPause() {
         if (exoPlayer.isPlaying) {
             exoPlayer.pause()
             stopProgressUpdate()
@@ -95,12 +97,10 @@ class MusicPlayerServiceHandler @Inject constructor(
         }
     }
 
-    private fun startProgressUpdate()  {
-        job = CoroutineScope(mainDispatcher).launch {
-            while (isActive) {
-                delay(500)
-                _audioState.value = MusicPlayerState.Progress(exoPlayer.currentPosition)
-            }
+    private suspend fun startProgressUpdate()  = job.run {
+        while (true) {
+            delay(500)
+            _audioState.value = MusicPlayerState.Progress(exoPlayer.currentPosition)
         }
     }
 
@@ -110,13 +110,26 @@ class MusicPlayerServiceHandler @Inject constructor(
         _audioState.value = MusicPlayerState.Playing(isPlaying = false)
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         _audioState.value = MusicPlayerState.Playing(isPlaying = isPlaying)
         _audioState.value = MusicPlayerState.CurrentPlaying(exoPlayer.currentMediaItemIndex)
         if (isPlaying) {
-            startProgressUpdate()
+            GlobalScope.launch(mainDispatcher) {
+                startProgressUpdate()
+            }
         } else {
             stopProgressUpdate()
+        }
+    }
+
+    override fun onPlaybackStateChanged(playbackState: Int) {
+        when (playbackState) {
+            ExoPlayer.STATE_BUFFERING -> _audioState.value =
+                MusicPlayerState.Buffering(exoPlayer.currentPosition)
+
+            ExoPlayer.STATE_READY -> _audioState.value =
+                MusicPlayerState.Ready(exoPlayer.duration)
         }
     }
 }

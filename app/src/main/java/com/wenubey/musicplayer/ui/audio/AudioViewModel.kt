@@ -3,7 +3,6 @@ package com.wenubey.musicplayer.ui.audio
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,11 +12,11 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import com.wenubey.musicplayer.data.local.Audio
 import com.wenubey.musicplayer.domain.AudioRepository
-import com.wenubey.musicplayer.utils.formatDuration
 import com.wenubey.musicplayer.player.service.MusicPlayerServiceHandler
 import com.wenubey.musicplayer.player.service.MusicPlayerState
 import com.wenubey.musicplayer.player.service.PlayerEvent
 import com.wenubey.musicplayer.utils.Utils.fakeAudio
+import com.wenubey.musicplayer.utils.formatDuration
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,7 +35,7 @@ class AudioViewModel @Inject constructor(
 
     var duration by savedStateHandle.saveable { mutableLongStateOf(0L) }
     var progress by savedStateHandle.saveable { mutableFloatStateOf(0f) }
-    var progressString by savedStateHandle.saveable { mutableStateOf("") }
+    var progressString by savedStateHandle.saveable { mutableStateOf("00:00") }
     var isPlaying by savedStateHandle.saveable { mutableStateOf(false) }
     var currentSelectedAudio by savedStateHandle.saveable { mutableStateOf(fakeAudio) }
     var audioList by savedStateHandle.saveable { mutableStateOf(listOf<Audio>()) }
@@ -68,7 +67,6 @@ class AudioViewModel @Inject constructor(
             }
         }
     }
-
     fun onUiEvent(uiEvent: UiEvent) = viewModelScope.launch {
         when(uiEvent) {
             is UiEvent.Backward -> musicPlayerServiceHandler.onPlayerEvent(PlayerEvent.Backward)
@@ -101,11 +99,8 @@ class AudioViewModel @Inject constructor(
 
     private fun calculateProgress(currentProgress: Long) {
         progress =
-            if (currentProgress > 0) {
-                ((currentProgress.toFloat() / duration.toFloat()) * 100f)
-            } else {
-                0f
-            }
+            if (currentProgress > 0) ((currentProgress.toFloat() / duration.toFloat()) * 100f)
+            else 0f
         progressString = currentProgress.formatDuration()
     }
 
@@ -139,5 +134,8 @@ class AudioViewModel @Inject constructor(
         super.onCleared()
     }
 
+    companion object {
+        private const val TAG = "audioViewModel"
+    }
 }
 

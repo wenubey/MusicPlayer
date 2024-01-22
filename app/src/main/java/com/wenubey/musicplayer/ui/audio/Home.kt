@@ -35,6 +35,8 @@ fun Home(
     onStart: () -> Unit,
     onItemClick: (Int) -> Unit,
     onNext: () -> Unit,
+    progressString: String,
+    audioDuration: String,
 ) {
     HomeContent(
         progress = progress,
@@ -44,7 +46,10 @@ fun Home(
         onNext = onNext,
         onItemClick = onItemClick,
         onStart = onStart,
-        currentPlayingAudio = currentPlayingAudio
+        currentPlayingAudio = currentPlayingAudio,
+        progressString = progressString,
+        audioDuration = audioDuration
+
     )
 }
 
@@ -58,6 +63,8 @@ private fun HomeContent(
     onStart: () -> Unit = {},
     onItemClick: (Int) -> Unit = {},
     onNext: () -> Unit = {},
+    progressString: String = "00:00",
+    audioDuration: String = "02:00"
 ) {
     Scaffold(
         bottomBar = {
@@ -67,7 +74,9 @@ private fun HomeContent(
                 audio = currentPlayingAudio,
                 isAudioPlaying = isAudioPlaying,
                 onStart = onStart,
-                onNext = onNext
+                onNext = onNext,
+                progressString = progressString,
+                audioDuration = audioDuration
             )
         }
     ) { paddingValues ->

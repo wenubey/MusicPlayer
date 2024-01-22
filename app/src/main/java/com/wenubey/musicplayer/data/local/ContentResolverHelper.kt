@@ -24,8 +24,8 @@ class ContentResolverHelper @Inject constructor(
         MediaStore.Audio.AudioColumns.TITLE,
     )
 
-    private var selectionQuery = "${MediaStore.Audio.AudioColumns.IS_MUSIC} = ? AND ${MediaStore.Audio.Media.MIME_TYPE} NOT IN (?, ?, ?)"
-    private var selectionArgs = arrayOf("1", "audio/3gp", "audio/asc")
+    private var selectionQuery = "${MediaStore.Audio.AudioColumns.IS_MUSIC} = ? AND ${MediaStore.Audio.Media.MIME_TYPE} = ?"
+    private var selectionArgs = arrayOf("1", "audio/mpeg")
 
     private val sortOrder = "${MediaStore.Audio.AudioColumns.DISPLAY_NAME} ASC"
 
@@ -42,7 +42,7 @@ class ContentResolverHelper @Inject constructor(
             projection,
             selectionQuery,
             selectionArgs,
-            sortOrder
+            sortOrder,
         )
 
         cursor?.use {

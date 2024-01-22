@@ -1,6 +1,7 @@
 package com.wenubey.musicplayer.ui.audio
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +44,8 @@ fun BottomBarPlayer(
     isAudioPlaying: Boolean,
     onStart: () -> Unit,
     onNext: () -> Unit,
+    progressString: String,
+    audioDuration: String,
 ) {
     BottomBarPlayerContent(
         progress = progress,
@@ -50,7 +53,9 @@ fun BottomBarPlayer(
         audio = audio,
         isAudioPlaying = isAudioPlaying,
         onStart = onStart,
-        onNext = onNext
+        onNext = onNext,
+        progressString = progressString,
+        audioDuration = audioDuration
     )
 }
 
@@ -58,10 +63,12 @@ fun BottomBarPlayer(
 private fun BottomBarPlayerContent(
     progress: Float = 0f,
     onProgress: (Float) -> Unit = {},
+    progressString: String = "00:00",
     audio: Audio = fakeAudio,
     isAudioPlaying: Boolean = false,
     onStart: () -> Unit = {},
     onNext: () -> Unit = {},
+    audioDuration: String = "02:00"
 ) {
     BottomAppBar(
         content = {
@@ -77,18 +84,29 @@ private fun BottomBarPlayerContent(
                 ) {
                     ArtistInfo(
                         audio = audio,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(0.1f)
                     )
                     MediaPlayerController(
                         isAudioPlaying = isAudioPlaying,
                         onStart = onStart,
                         onNext = onNext
                     )
-                    Slider(
-                        value = progress,
-                        onValueChange = { onProgress(it) },
-                        valueRange = 0f..100f,
-                    )
+                    Column {
+                        Slider(
+                            modifier = Modifier.weight(0.9f),
+                            value = progress,
+                            onValueChange = { onProgress(it) },
+                            valueRange = 0f..100f,
+                        )
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(text = progressString)
+                            Text(text = audioDuration)
+                        }
+                    }
+
                 }
             }
         }
@@ -101,12 +119,16 @@ fun MediaPlayerController(
     onNext: () -> Unit,
     onStart: () -> Unit
 ) {
-    Row(modifier = Modifier
-        .height(56.dp)
-        .padding(4.dp),
+    Row(
+        modifier = Modifier
+            .height(56.dp)
+            .padding(4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        ) {
-        PlayerIconItem(icon = if (isAudioPlaying) Icons.Default.Pause else Icons.Default.PlayArrow, onClick = onStart)
+    ) {
+        PlayerIconItem(
+            icon = if (isAudioPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+            onClick = onStart
+        )
         Spacer(modifier = Modifier.height(8.dp))
         Icon(
             imageVector = Icons.Default.SkipNext,

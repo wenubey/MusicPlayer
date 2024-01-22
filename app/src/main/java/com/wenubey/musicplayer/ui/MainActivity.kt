@@ -1,7 +1,10 @@
 package com.wenubey.musicplayer.ui
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -22,6 +25,7 @@ import com.wenubey.musicplayer.ui.audio.AudioViewModel
 import com.wenubey.musicplayer.ui.audio.Home
 import com.wenubey.musicplayer.ui.audio.UiEvent
 import com.wenubey.musicplayer.ui.theme.MusicPlayerTheme
+import com.wenubey.musicplayer.utils.formatDuration
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -34,13 +38,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MusicPlayerTheme {
-                val permissionState =
+                val rememberExternalStoragePermission =
                     rememberPermissionState(permission = Manifest.permission.READ_EXTERNAL_STORAGE)
                 val lifecycleOwner = LocalLifecycleOwner.current
                 DisposableEffect(key1 = lifecycleOwner) {
                     val observer = LifecycleEventObserver { _, event ->
                         if (event == Lifecycle.Event.ON_RESUME) {
-                            permissionState.launchPermissionRequest()
+                            rememberExternalStoragePermission.launchPermissionRequest()
                         }
                     }
                     lifecycleOwner.lifecycle.addObserver(observer)
@@ -63,16 +67,26 @@ class MainActivity : ComponentActivity() {
                             viewModel.onUiEvent(UiEvent.SelectedAudioChange(it))
                             startPlayerService()
                         },
-                        onNext = { viewModel.onUiEvent(UiEvent.SeekToNext) }
+                        onNext = { viewModel.onUiEvent(UiEvent.SeekToNext) },
+                        progressString = viewModel.progressString,
+                        audioDuration = viewModel.duration.formatDuration()
                     )
                 }
             }
         }
     }
+
+
+
+    @SuppressLint("ObsoleteSdkInt")
     private fun startPlayerService() {
         if (!isServiceRunning) {
             val intent = Intent(this, MusicPlayerService::class.java)
-            startForegroundService(intent)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
             isServiceRunning = true
         }
     }

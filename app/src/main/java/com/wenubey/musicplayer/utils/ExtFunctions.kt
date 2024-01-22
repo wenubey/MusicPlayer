@@ -1,12 +1,13 @@
 package com.wenubey.musicplayer.utils
 
+import android.util.Log
 import java.util.concurrent.TimeUnit
 import kotlin.math.floor
 
 fun Long.formatDuration(): String {
-    val minute = TimeUnit.MINUTES.convert(this, TimeUnit.MILLISECONDS)
-    val seconds = (minute) - minute * TimeUnit.SECONDS.convert(1, TimeUnit.MINUTES)
-    return String.format("%02d:%02d", minute, seconds)
+    val minutes = TimeUnit.MINUTES.convert(this, TimeUnit.MILLISECONDS)
+    val seconds = TimeUnit.SECONDS.convert(this, TimeUnit.MILLISECONDS) - minutes * 60
+    return String.format("%02d:%02d", minutes, seconds)
 }
 
 
