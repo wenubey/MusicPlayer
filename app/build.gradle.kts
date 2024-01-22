@@ -87,6 +87,9 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:$hiltAndroid")
 
 
+    implementation ("com.google.accompanist:accompanist-permissions:0.30.0")
+
+
     val mediaExoPlayer = "1.2.1"
     implementation("androidx.media3:media3-exoplayer:$mediaExoPlayer")
     implementation("androidx.media3:media3-datasource-okhttp:$mediaExoPlayer")

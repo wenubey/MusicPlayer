@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,7 +37,14 @@ fun Home(
     onNext: () -> Unit,
 ) {
     HomeContent(
-
+        progress = progress,
+        onProgress = onProgress,
+        isAudioPlaying = isAudioPlaying,
+        audioList = audioList,
+        onNext = onNext,
+        onItemClick = onItemClick,
+        onStart = onStart,
+        currentPlayingAudio = currentPlayingAudio
     )
 }
 

@@ -7,8 +7,12 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.session.MediaSession
+import com.wenubey.musicplayer.data.local.ContentResolverHelper
+import com.wenubey.musicplayer.data.repository.AudioRepositoryImpl
+import com.wenubey.musicplayer.domain.AudioRepository
 import com.wenubey.musicplayer.player.notification.MusicPlayerNotificationManager
 import com.wenubey.musicplayer.player.service.MusicPlayerServiceHandler
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -80,4 +84,14 @@ object AppModule {
     @Singleton
     fun provideServiceHandler(exoPlayer: ExoPlayer, @MainDispatcher mainDispatcher: CoroutineDispatcher): MusicPlayerServiceHandler =
         MusicPlayerServiceHandler(exoPlayer, mainDispatcher)
+
+    @Provides
+    @Singleton
+    fun provideAudioRepository(
+        contentResolverHelper: ContentResolverHelper,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher
+    ): AudioRepository = AudioRepositoryImpl(
+        contentResolverHelper,
+        ioDispatcher
+    )
 }
