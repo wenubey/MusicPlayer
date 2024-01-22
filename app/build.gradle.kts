@@ -84,8 +84,15 @@ dependencies {
     val hiltAndroid = "2.50"
     implementation("com.google.dagger:hilt-android:$hiltAndroid")
     kapt("com.google.dagger:hilt-android-compiler:$hiltAndroid")
+
+
     val mediaExoPlayer = "1.2.1"
     implementation("androidx.media3:media3-exoplayer:$mediaExoPlayer")
+    implementation("androidx.media3:media3-datasource-okhttp:$mediaExoPlayer")
+    implementation("androidx.media3:media3-ui:$mediaExoPlayer")
+    implementation("androidx.media3:media3-session:$mediaExoPlayer")
+    implementation("androidx.legacy:legacy-support-v4:1.0.0")
+
     val glideCompose = "1.0.0-alpha.1"
     implementation("com.github.bumptech.glide:compose:$glideCompose")
     val lottieCompose = "6.0.1"
