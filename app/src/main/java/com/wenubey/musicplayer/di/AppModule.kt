@@ -7,6 +7,8 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.session.MediaSession
+import com.wenubey.musicplayer.player.notification.MusicPlayerNotificationManager
+import com.wenubey.musicplayer.player.service.MusicPlayerServiceHandler
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,9 +27,17 @@ object AppModule {
     @Retention(AnnotationRetention.BINARY)
     annotation class IoDispatcher
 
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class MainDispatcher
+
     @Provides
     @IoDispatcher
     fun providesIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
+
+    @Provides
+    @MainDispatcher
+    fun providesMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
 
 
     @Provides
@@ -56,4 +66,18 @@ object AppModule {
         player: ExoPlayer,
     ): MediaSession = MediaSession.Builder(context,player).build()
 
+    @Provides
+    @Singleton
+    fun provideNotificationManager(
+        @ApplicationContext context: Context,
+        player: ExoPlayer
+    ): MusicPlayerNotificationManager = MusicPlayerNotificationManager(
+        context,
+        player
+    )
+
+    @Provides
+    @Singleton
+    fun provideServiceHandler(exoPlayer: ExoPlayer): MusicPlayerServiceHandler =
+        MusicPlayerServiceHandler(exoPlayer)
 }
