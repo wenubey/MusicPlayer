@@ -3,7 +3,10 @@ package com.wenubey.musicplayer.player.notification
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.annotation.OptIn
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -13,6 +16,8 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import androidx.media3.ui.PlayerNotificationManager
 import com.wenubey.musicplayer.R
+import com.wenubey.musicplayer.data.local.Audio
+import com.wenubey.musicplayer.ui.MainActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -45,6 +50,21 @@ class MusicPlayerNotificationManager @Inject constructor(
         mediaSessionService.startForeground(NOTIFICATION_ID, notification)
     }
 
+    private fun getContentIntent(): PendingIntent {
+        val openAppIntent = Intent(context, MainActivity::class.java).apply {
+            action = Intent.ACTION_MAIN
+            addCategory(Intent.CATEGORY_LAUNCHER)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
+        return PendingIntent.getActivity(
+            context,
+            0,
+            openAppIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
 
     private fun buildNotification(mediaSession: MediaSession) {
         PlayerNotificationManager.Builder(
@@ -55,7 +75,7 @@ class MusicPlayerNotificationManager @Inject constructor(
             .setMediaDescriptionAdapter(
                 MusicPlayerNotificationAdapter(
                     context,
-                    mediaSession.sessionActivity
+                    getContentIntent()
                 )
             )
             .setSmallIconResourceId(R.drawable.baseline_microphone_24)

@@ -2,9 +2,7 @@ package com.wenubey.musicplayer.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -75,8 +73,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-
 
     @SuppressLint("ObsoleteSdkInt")
     private fun startPlayerService() {

@@ -1,5 +1,6 @@
 package com.wenubey.musicplayer.ui.audio
 
+import android.util.Log
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -40,11 +41,18 @@ class AudioViewModel @Inject constructor(
     var currentSelectedAudio by savedStateHandle.saveable { mutableStateOf(fakeAudio) }
     var audioList by savedStateHandle.saveable { mutableStateOf(listOf<Audio>()) }
 
+
+
     private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState.Initial)
     val uiState: StateFlow<UiState> get() = _uiState.asStateFlow()
 
+init {
+    Log.i(TAG, "currentSelectedAudio: $currentSelectedAudio")
+}
+
     init {
-        loadAudioData()
+            loadAudioData()
+
     }
 
     init {
@@ -68,7 +76,8 @@ class AudioViewModel @Inject constructor(
         }
     }
     fun onUiEvent(uiEvent: UiEvent) = viewModelScope.launch {
-        when(uiEvent) {
+        when (uiEvent) {
+
             is UiEvent.Backward -> musicPlayerServiceHandler.onPlayerEvent(PlayerEvent.Backward)
             is UiEvent.Forward -> musicPlayerServiceHandler.onPlayerEvent(PlayerEvent.Forward)
             is UiEvent.SeekToNext -> musicPlayerServiceHandler.onPlayerEvent(PlayerEvent.SeekToNext)
@@ -123,7 +132,9 @@ class AudioViewModel @Inject constructor(
                 )
                 .build()
         }.also {
-            musicPlayerServiceHandler.setMediaItemList(it)
+            viewModelScope.launch {
+                musicPlayerServiceHandler.setMediaItemList(it)
+            }
         }
     }
 
@@ -135,7 +146,7 @@ class AudioViewModel @Inject constructor(
     }
 
     companion object {
-        private const val TAG = "audioViewModel"
+        private const val TAG = "TAG"
     }
 }
 
