@@ -4,13 +4,13 @@ import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import androidx.core.graphics.drawable.toBitmap
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerNotificationManager
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
+import coil.ImageLoader
+import coil.request.ImageRequest
+import coil.target.Target
 
 @UnstableApi
 class MusicPlayerNotificationAdapter(
@@ -30,17 +30,18 @@ class MusicPlayerNotificationAdapter(
         player: Player,
         callback: PlayerNotificationManager.BitmapCallback
     ): Bitmap? {
-        Glide.with(context)
-            .asBitmap()
-            .load(player.mediaMetadata.artworkUri)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .into(object : CustomTarget<Bitmap>() {
-                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                    callback.onBitmap(resource)
+        val imageLoader = ImageLoader(context)
+        val request = ImageRequest.Builder(context)
+            .data(player.mediaMetadata.artworkUri)
+            .allowHardware(false)
+            .target(object : Target {
+                override fun onSuccess(result: Drawable) {
+                    callback.onBitmap(result.toBitmap())
                 }
-
-                override fun onLoadCleared(placeholder: Drawable?) = Unit
             })
+            .build()
+
+        imageLoader.enqueue(request)
         return null
     }
 

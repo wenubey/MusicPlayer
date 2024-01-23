@@ -23,7 +23,6 @@ import com.wenubey.musicplayer.ui.audio.AudioViewModel
 import com.wenubey.musicplayer.ui.audio.Home
 import com.wenubey.musicplayer.ui.audio.UiEvent
 import com.wenubey.musicplayer.ui.theme.MusicPlayerTheme
-import com.wenubey.musicplayer.utils.formatDuration
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -50,6 +49,7 @@ class MainActivity : ComponentActivity() {
                         lifecycleOwner.lifecycle.removeObserver(observer)
                     }
                 }
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -66,8 +66,8 @@ class MainActivity : ComponentActivity() {
                             startPlayerService()
                         },
                         onNext = { viewModel.onUiEvent(UiEvent.SeekToNext) },
+                        onPrevious = {viewModel.onUiEvent(UiEvent.SeekToPrevious)},
                         progressString = viewModel.progressString,
-                        audioDuration = viewModel.duration.formatDuration()
                     )
                 }
             }

@@ -2,7 +2,6 @@ package com.wenubey.musicplayer.ui.audio
 
 import android.util.Log
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -34,7 +33,7 @@ class AudioViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    var duration by savedStateHandle.saveable { mutableLongStateOf(0L) }
+
     var progress by savedStateHandle.saveable { mutableFloatStateOf(0f) }
     var progressString by savedStateHandle.saveable { mutableStateOf("00:00") }
     var isPlaying by savedStateHandle.saveable { mutableStateOf(false) }
@@ -42,17 +41,12 @@ class AudioViewModel @Inject constructor(
     var audioList by savedStateHandle.saveable { mutableStateOf(listOf<Audio>()) }
 
 
-
     private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState.Initial)
     val uiState: StateFlow<UiState> get() = _uiState.asStateFlow()
 
-init {
-    Log.i(TAG, "currentSelectedAudio: $currentSelectedAudio")
-}
 
     init {
-            loadAudioData()
-
+        loadAudioData()
     }
 
     init {
@@ -66,38 +60,43 @@ init {
                     is MusicPlayerState.CurrentPlaying -> {
                         currentSelectedAudio = audioList[musicPlayerState.mediaItemIndex]
                     }
-
                     is MusicPlayerState.Ready -> {
-                        duration = musicPlayerState.duration
                         _uiState.value = UiState.Ready
                     }
                 }
             }
         }
     }
+
     fun onUiEvent(uiEvent: UiEvent) = viewModelScope.launch {
+
+
         when (uiEvent) {
 
             is UiEvent.Backward -> musicPlayerServiceHandler.onPlayerEvent(PlayerEvent.Backward)
             is UiEvent.Forward -> musicPlayerServiceHandler.onPlayerEvent(PlayerEvent.Forward)
             is UiEvent.SeekToNext -> musicPlayerServiceHandler.onPlayerEvent(PlayerEvent.SeekToNext)
+            is UiEvent.SeekToPrevious -> musicPlayerServiceHandler.onPlayerEvent(PlayerEvent.SeekToPrevious)
             is UiEvent.PlayPause -> musicPlayerServiceHandler.onPlayerEvent(PlayerEvent.PlayPause)
             is UiEvent.SeekTo -> {
+                val za = ((currentSelectedAudio.duration * uiEvent.position) / 100f).toLong()
                 musicPlayerServiceHandler.onPlayerEvent(
                     PlayerEvent.SeekTo,
-                    seekPosition = ((duration * uiEvent.position) / 100f).toLong()
+                    seekPosition = za
                 )
             }
+
             is UiEvent.SelectedAudioChange -> {
                 musicPlayerServiceHandler.onPlayerEvent(
                     PlayerEvent.SelectedAudioChange,
                     selectedAudioIndex = uiEvent.index
                 )
             }
+
             is UiEvent.UpdateProgress -> {
                 musicPlayerServiceHandler.onPlayerEvent(
                     PlayerEvent.UpdateProgress(
-                        uiEvent.newProgress
+                        uiEvent.newProgress,
                     )
                 )
                 progress = uiEvent.newProgress
@@ -108,16 +107,21 @@ init {
 
     private fun calculateProgress(currentProgress: Long) {
         progress =
-            if (currentProgress > 0) ((currentProgress.toFloat() / duration.toFloat()) * 100f)
+            if (currentProgress > 0) ((currentProgress.toFloat() / currentSelectedAudio.duration.toFloat()) * 100f)
             else 0f
+        Log.i(TAG, "calculateProgress:currentProgress: ${currentProgress.toFloat()}")
+        Log.i(TAG, "calculateProgress:currentSelectedAudio.duration.toFloat(): ${currentSelectedAudio.duration.toFloat()}")
+        Log.i(TAG, "calculateProgress:progress: $progress ")
         progressString = currentProgress.formatDuration()
+
     }
 
     private fun loadAudioData() = viewModelScope.launch {
-        val audio = repository.getAudioData()
-        audioList = audio
+        val audios = repository.getAudioData()
+        audioList = audios
         setMediaItems()
     }
+
 
     private fun setMediaItems() {
         audioList.map { audio: Audio ->
@@ -146,7 +150,7 @@ init {
     }
 
     companion object {
-        private const val TAG = "TAG"
+        private const val TAG = "AudioViewModel"
     }
 }
 

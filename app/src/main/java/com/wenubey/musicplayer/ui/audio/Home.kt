@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -35,8 +37,8 @@ fun Home(
     onStart: () -> Unit,
     onItemClick: (Int) -> Unit,
     onNext: () -> Unit,
+    onPrevious: () -> Unit,
     progressString: String,
-    audioDuration: String,
 ) {
     HomeContent(
         progress = progress,
@@ -46,9 +48,9 @@ fun Home(
         onNext = onNext,
         onItemClick = onItemClick,
         onStart = onStart,
+        onPrevious = onPrevious,
         currentPlayingAudio = currentPlayingAudio,
         progressString = progressString,
-        audioDuration = audioDuration
 
     )
 }
@@ -63,33 +65,36 @@ private fun HomeContent(
     onStart: () -> Unit = {},
     onItemClick: (Int) -> Unit = {},
     onNext: () -> Unit = {},
+    onPrevious: () -> Unit = {},
     progressString: String = "00:00",
-    audioDuration: String = "02:00"
 ) {
-    Scaffold(
-        bottomBar = {
-            BottomBarPlayer(
+    Scaffold { paddingValues ->
+        Column(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                contentPadding = paddingValues,
+                modifier = Modifier
+                    .fillMaxHeight(0.85f)
+                    .fillMaxWidth()
+            ) {
+                itemsIndexed(audioList) { index, audio ->
+                    AudioItem(
+                        audio = audio,
+                        onItemClick = { onItemClick(index) }
+                    )
+                }
+            }
+            PlayerBar(
                 progress = progress,
                 onProgress = onProgress,
                 audio = currentPlayingAudio,
                 isAudioPlaying = isAudioPlaying,
                 onStart = onStart,
                 onNext = onNext,
+                onPrevious = onPrevious,
                 progressString = progressString,
-                audioDuration = audioDuration
             )
         }
-    ) { paddingValues ->
-        LazyColumn(
-            contentPadding = paddingValues
-        ) {
-            itemsIndexed(audioList) { index,  audio ->
-                AudioItem(
-                    audio = audio,
-                    onItemClick = { onItemClick(index) }
-                )
-            }
-        }
+
     }
 }
 

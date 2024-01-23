@@ -98,8 +98,7 @@ dependencies {
     implementation("androidx.media3:media3-session:$mediaExoPlayer")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
 
-    val glideCompose = "1.0.0-alpha.1"
-    implementation("com.github.bumptech.glide:compose:$glideCompose")
-    val lottieCompose = "6.0.1"
-    implementation("com.airbnb.android:lottie-compose:$lottieCompose")
+
+    //Coil
+    implementation("io.coil-kt:coil-compose:2.5.0")
 }
