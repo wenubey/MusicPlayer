@@ -1,7 +1,6 @@
 package com.wenubey.musicplayer.ui.audio
 
 import android.content.res.Configuration
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -19,8 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.wenubey.musicplayer.data.local.Audio
-import com.wenubey.musicplayer.ui.theme.DarkColorScheme
-import com.wenubey.musicplayer.ui.theme.LightColorScheme
 import com.wenubey.musicplayer.utils.Utils.fakeAudio
 
 @Composable
@@ -29,7 +25,7 @@ fun PlayerBar(
     onProgress: (Float) -> Unit,
     audio: Audio,
     isAudioPlaying: Boolean,
-    onStart: () -> Unit,
+    onPlayPause: () -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
     progressString: String,
@@ -39,7 +35,7 @@ fun PlayerBar(
         onProgress = onProgress,
         audio = audio,
         isAudioPlaying = isAudioPlaying,
-        onStart = onStart,
+        onStart = onPlayPause,
         onNext = onNext,
         onPrevious = onPrevious,
         progressString = progressString,
@@ -60,10 +56,6 @@ private fun PlayerBarContent(
 ) {
     ElevatedCard(
         modifier = Modifier.height(144.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSystemInDarkTheme()) LightColorScheme.primaryContainer else DarkColorScheme.primaryContainer,
-            contentColor = if (isSystemInDarkTheme()) LightColorScheme.onPrimaryContainer else DarkColorScheme.onPrimaryContainer
-        )
     ) {
         Column(
             modifier = Modifier

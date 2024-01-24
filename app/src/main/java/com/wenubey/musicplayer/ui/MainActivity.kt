@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
                         isAudioPlaying = viewModel.isPlaying,
                         currentPlayingAudio = viewModel.currentSelectedAudio,
                         audioList = viewModel.audioList,
-                        onStart = { viewModel.onUiEvent(UiEvent.PlayPause) },
+                        onPlayPause = { viewModel.onUiEvent(UiEvent.PlayPause) },
                         onItemClick = {
                             viewModel.onUiEvent(UiEvent.SelectedAudioChange(it))
                             startPlayerService()

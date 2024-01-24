@@ -98,6 +98,8 @@ dependencies {
     implementation("androidx.media3:media3-session:$mediaExoPlayer")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
 
+    //Lottie for animation
+    implementation ("com.airbnb.android:lottie-compose:6.0.1")
 
     //Coil
     implementation("io.coil-kt:coil-compose:2.5.0")

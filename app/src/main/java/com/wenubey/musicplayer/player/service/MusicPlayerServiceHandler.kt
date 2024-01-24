@@ -47,7 +47,7 @@ class MusicPlayerServiceHandler @Inject constructor(
         selectedAudioIndex: Int = -1,
         seekPosition: Long = 0,
     ) {
-        Log.i("TAG", "playerEvent: $playerEvent")
+        Log.w(TAG, "playerEvent: $playerEvent")
         when (playerEvent) {
             is PlayerEvent.PlayPause -> playOrPause()
             is PlayerEvent.SeekTo -> exoPlayer.seekTo(seekPosition)
@@ -60,21 +60,14 @@ class MusicPlayerServiceHandler @Inject constructor(
                     exoPlayer.seekToNext()
                 }
             }
-
             is PlayerEvent.SeekToPrevious -> exoPlayer.seekToPrevious()
             is PlayerEvent.Stop -> stopProgressUpdate()
             is PlayerEvent.UpdateProgress -> {
                 val xd = (exoPlayer.duration * playerEvent.newProgress).toLong()
-                Log.i(TAG, " PlayerEvent.UpdateProgress: $xd")
-                Log.i(
-                    TAG,
-                    "exoplayer.duration: ${exoPlayer.duration},playerEvent.newProgress: ${playerEvent.newProgress} "
-                )
                 exoPlayer.seekTo(
                     xd
                 )
             }
-
             is PlayerEvent.SelectedAudioChange -> {
                 when (selectedAudioIndex) {
                     exoPlayer.currentMediaItemIndex -> {

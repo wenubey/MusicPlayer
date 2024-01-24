@@ -1,6 +1,5 @@
 package com.wenubey.musicplayer.ui.audio
 
-import android.util.Log
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
@@ -109,9 +108,6 @@ class AudioViewModel @Inject constructor(
         progress =
             if (currentProgress > 0) ((currentProgress.toFloat() / currentSelectedAudio.duration.toFloat()) * 100f)
             else 0f
-        Log.i(TAG, "calculateProgress:currentProgress: ${currentProgress.toFloat()}")
-        Log.i(TAG, "calculateProgress:currentSelectedAudio.duration.toFloat(): ${currentSelectedAudio.duration.toFloat()}")
-        Log.i(TAG, "calculateProgress:progress: $progress ")
         progressString = currentProgress.formatDuration()
 
     }
@@ -149,8 +145,5 @@ class AudioViewModel @Inject constructor(
         super.onCleared()
     }
 
-    companion object {
-        private const val TAG = "AudioViewModel"
-    }
 }
 

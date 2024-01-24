@@ -5,6 +5,6 @@ import com.wenubey.musicplayer.data.local.Audio
 
 object Utils {
     val fakeAudio = Audio(
-        "".toUri(), "FAKE", 0L, "", "", 0, "", "".toUri()
+        "".toUri(), "Music", 0L, "Artist", "", 100, "Music Title", "".toUri()
     )
 }
