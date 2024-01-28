@@ -1,5 +1,6 @@
 package com.wenubey.musicplayer.ui.audio
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
@@ -23,22 +24,31 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.absoluteValue
 
 @HiltViewModel
 @OptIn(SavedStateHandleSaveableApi::class)
 class AudioViewModel @Inject constructor(
     private val musicPlayerServiceHandler: MusicPlayerServiceHandler,
     private val repository: AudioRepository,
-    savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
 
-    var progress by savedStateHandle.saveable { mutableFloatStateOf(0f) }
-    var progressString by savedStateHandle.saveable { mutableStateOf("00:00") }
-    var isPlaying by savedStateHandle.saveable { mutableStateOf(false) }
-    var currentSelectedAudio by savedStateHandle.saveable { mutableStateOf(fakeAudio) }
-    var audioList by savedStateHandle.saveable { mutableStateOf(listOf<Audio>()) }
+    private val _progress = mutableFloatStateOf(0f)
+    val progress: State<Float> = _progress
 
+    private val _currentDuration = mutableStateOf("00:00")
+    val currentDuration: State<String> = _currentDuration
+
+    private val _isPlaying = mutableStateOf(false)
+    val isPlaying: State<Boolean> = _isPlaying
+
+    private val _currentSelectedAudio = mutableStateOf(fakeAudio)
+    val currentSelectedAudio: State<Audio> = _currentSelectedAudio
+
+    private val _audioList = mutableStateOf<List<Audio>>(emptyList())
+    val audioList: State<List<Audio>> = _audioList
 
     private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState.Initial)
     val uiState: StateFlow<UiState> get() = _uiState.asStateFlow()
@@ -46,6 +56,15 @@ class AudioViewModel @Inject constructor(
 
     init {
         loadAudioData()
+        getSavedState()
+    }
+
+    private fun getSavedState() {
+        _progress.floatValue = savedStateHandle.get<Float>(PROGRESS) ?: 0f
+        _currentDuration.value = savedStateHandle.get<String>(CURRENT_DURATION) ?: "00:00"
+        _isPlaying.value = savedStateHandle.get<Boolean>(IS_PLAYING) ?: false
+        _currentSelectedAudio.value = savedStateHandle.get<Audio>(CURRENT_SELECTED_AUDIO) ?: fakeAudio
+        _audioList.value = savedStateHandle.get<List<Audio>>(AUDIO_LIST) ?: emptyList()
     }
 
     init {
@@ -53,12 +72,14 @@ class AudioViewModel @Inject constructor(
             musicPlayerServiceHandler.audioState.collectLatest { musicPlayerState ->
                 when (musicPlayerState) {
                     is MusicPlayerState.Initial -> _uiState.value = UiState.Initial
-                    is MusicPlayerState.Playing -> isPlaying = musicPlayerState.isPlaying
+                    is MusicPlayerState.Playing -> _isPlaying.value = musicPlayerState.isPlaying
                     is MusicPlayerState.Buffering -> calculateProgress(musicPlayerState.progress)
                     is MusicPlayerState.Progress -> calculateProgress(musicPlayerState.progress)
                     is MusicPlayerState.CurrentPlaying -> {
-                        currentSelectedAudio = audioList[musicPlayerState.mediaItemIndex]
+                        _currentSelectedAudio.value =
+                            _audioList.value[musicPlayerState.mediaItemIndex]
                     }
+
                     is MusicPlayerState.Ready -> {
                         _uiState.value = UiState.Ready
                     }
@@ -78,10 +99,9 @@ class AudioViewModel @Inject constructor(
             is UiEvent.SeekToPrevious -> musicPlayerServiceHandler.onPlayerEvent(PlayerEvent.SeekToPrevious)
             is UiEvent.PlayPause -> musicPlayerServiceHandler.onPlayerEvent(PlayerEvent.PlayPause)
             is UiEvent.SeekTo -> {
-                val za = ((currentSelectedAudio.duration * uiEvent.position) / 100f).toLong()
                 musicPlayerServiceHandler.onPlayerEvent(
                     PlayerEvent.SeekTo,
-                    seekPosition = za
+                    seekPosition = ((currentSelectedAudio.value.duration * uiEvent.position) / 100f).toLong()
                 )
             }
 
@@ -98,29 +118,29 @@ class AudioViewModel @Inject constructor(
                         uiEvent.newProgress,
                     )
                 )
-                progress = uiEvent.newProgress
+                _progress.floatValue = uiEvent.newProgress
             }
         }
     }
 
 
     private fun calculateProgress(currentProgress: Long) {
-        progress =
-            if (currentProgress > 0) ((currentProgress.toFloat() / currentSelectedAudio.duration.toFloat()) * 100f)
+        _progress.floatValue =
+            if (currentProgress > 0) ((currentProgress.absoluteValue.toFloat() / currentSelectedAudio.value.duration.toFloat()) * 100f)
             else 0f
-        progressString = currentProgress.formatDuration()
+        _currentDuration.value = currentProgress.formatDuration()
 
     }
 
     private fun loadAudioData() = viewModelScope.launch {
         val audios = repository.getAudioData()
-        audioList = audios
+        _audioList.value = audios
         setMediaItems()
     }
 
 
     private fun setMediaItems() {
-        audioList.map { audio: Audio ->
+        _audioList.value.map { audio: Audio ->
             MediaItem.Builder()
                 .setUri(audio.uri)
                 .setMediaMetadata(
@@ -132,6 +152,7 @@ class AudioViewModel @Inject constructor(
                 )
                 .build()
         }.also {
+
             viewModelScope.launch {
                 musicPlayerServiceHandler.setMediaItemList(it)
             }
@@ -141,9 +162,25 @@ class AudioViewModel @Inject constructor(
     override fun onCleared() {
         viewModelScope.launch {
             musicPlayerServiceHandler.onPlayerEvent(PlayerEvent.Stop)
+            saveStates()
         }
         super.onCleared()
     }
 
+    private fun saveStates() {
+        savedStateHandle[AUDIO_LIST] = audioList
+        savedStateHandle[PROGRESS] = progress
+        savedStateHandle[IS_PLAYING] = isPlaying
+        savedStateHandle[CURRENT_DURATION] = currentDuration
+        savedStateHandle[CURRENT_SELECTED_AUDIO] = currentSelectedAudio
+    }
+
+    companion object {
+        const val AUDIO_LIST = "audioList"
+        const val PROGRESS = "progress"
+        const val IS_PLAYING = "isPlaying"
+        const val CURRENT_DURATION = "currentDuration"
+        const val CURRENT_SELECTED_AUDIO = "currentSelectedAudio"
+    }
 }
 

@@ -1,7 +1,11 @@
 package com.wenubey.musicplayer.ui.audio
 
 import android.content.res.Configuration
+import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +30,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -78,7 +84,7 @@ private fun HomeContent(
     onProgress: (Float) -> Unit = {},
     isAudioPlaying: Boolean = false,
     currentPlayingAudio: Audio = fakeAudio,
-    audioList: List<Audio> = listOf(fakeAudio),
+    audioList: List<Audio> = listOf(fakeAudio, fakeAudio, fakeAudio),
     onPlayPause: () -> Unit = {},
     onItemClick: (Int) -> Unit = {},
     onNext: () -> Unit = {},
@@ -87,13 +93,31 @@ private fun HomeContent(
 ) {
     var selectedItemIndex by remember { mutableIntStateOf(-1) }
 
+    audioList.forEach {
+        Log.i("TAG", "HomeContent:audioList: ${it.title}")
+    }
+
     Scaffold { paddingValues ->
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(4.dp)
+        ) {
+            if (audioList.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "Your list is empty. Please download a music and try again...",
+                        color = Color.Red,
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
             LazyColumn(
                 contentPadding = paddingValues,
                 modifier = Modifier
-                    .fillMaxHeight(0.85f)
-                    .fillMaxWidth()
+                    .weight(0.83f)
             ) {
                 itemsIndexed(audioList) { index, audio ->
                     AudioItem(
@@ -112,6 +136,7 @@ private fun HomeContent(
                 }
             }
             PlayerBar(
+                modifier = Modifier.weight(0.17f),
                 progress = progress,
                 onProgress = onProgress,
                 audio = currentPlayingAudio,
@@ -134,9 +159,14 @@ private fun HomeContent(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun AudioItem(audio: Audio, onItemClick: () -> Unit, isSelected: Boolean, itemIndex: Int) {
+fun AudioItem(
+    audio: Audio = fakeAudio,
+    onItemClick: () -> Unit = {},
+    isSelected: Boolean = true,
+    itemIndex: Int = 1,
+) {
     val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.audio_vawe))
     val progress by animateLottieCompositionAsState(
         composition = composition,
@@ -149,11 +179,10 @@ fun AudioItem(audio: Audio, onItemClick: () -> Unit, isSelected: Boolean, itemIn
                 MaterialTheme.colorScheme.primary.hashCode(),
                 BlendModeCompat.SRC_ATOP
             ),
-            keyPath = arrayOf(
-                "**"
-            )
+            keyPath = arrayOf("**")
         )
     )
+    val marqueeModifier = Modifier.fillMaxWidth().basicMarquee()
 
     Card(
         modifier = Modifier
@@ -188,16 +217,33 @@ fun AudioItem(audio: Audio, onItemClick: () -> Unit, isSelected: Boolean, itemIn
             ) {
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
+                    modifier = if(isSelected) marqueeModifier else Modifier.fillMaxWidth(),
                     text = audio.title,
-                    overflow = TextOverflow.Clip,
+                    overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = audio.artist, maxLines = 1, overflow = TextOverflow.Clip)
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = audio.artist,
+                    maxLines = 1,
+                    overflow = TextOverflow.Clip,
+                )
             }
             Text(text = audio.duration.toLong().timeStampToDuration())
             Spacer(modifier = Modifier.width(8.dp))
+        }
+    }
+}
+
+@Preview(name = "Dark mode", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Preview(name = "Light mode", uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
+@Composable
+private fun AudioItemPreview() {
+    com.wenubey.musicplayer.ui.theme.MusicPlayerTheme {
+        Surface {
+            AudioItem()
         }
     }
 }

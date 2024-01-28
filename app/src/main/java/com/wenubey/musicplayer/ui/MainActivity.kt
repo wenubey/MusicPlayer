@@ -55,11 +55,11 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Home(
-                        progress = viewModel.progress,
+                        progress = viewModel.progress.value,
                         onProgress = { viewModel.onUiEvent(UiEvent.SeekTo(it)) },
-                        isAudioPlaying = viewModel.isPlaying,
-                        currentPlayingAudio = viewModel.currentSelectedAudio,
-                        audioList = viewModel.audioList,
+                        isAudioPlaying = viewModel.isPlaying.value,
+                        currentPlayingAudio = viewModel.currentSelectedAudio.value,
+                        audioList = viewModel.audioList.value,
                         onPlayPause = { viewModel.onUiEvent(UiEvent.PlayPause) },
                         onItemClick = {
                             viewModel.onUiEvent(UiEvent.SelectedAudioChange(it))
@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
                         },
                         onNext = { viewModel.onUiEvent(UiEvent.SeekToNext) },
                         onPrevious = {viewModel.onUiEvent(UiEvent.SeekToPrevious)},
-                        progressString = viewModel.progressString,
+                        progressString = viewModel.currentDuration.value,
                     )
                 }
             }

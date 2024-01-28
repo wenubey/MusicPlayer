@@ -15,4 +15,10 @@ data class Audio(
     val duration: Int,
     val title: String,
     val albumArtUri: Uri?,
-) : Parcelable
+) : Parcelable {
+    fun default(): Audio {
+        return Audio(
+            uri, displayName, id, artist, data, duration, title, albumArtUri
+        )
+    }
+}

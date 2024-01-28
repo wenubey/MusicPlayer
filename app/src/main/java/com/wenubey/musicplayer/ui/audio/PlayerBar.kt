@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -21,6 +22,7 @@ import com.wenubey.musicplayer.utils.Utils.fakeAudio
 
 @Composable
 fun PlayerBar(
+    modifier: Modifier = Modifier,
     progress: Float,
     onProgress: (Float) -> Unit,
     audio: Audio,
@@ -31,6 +33,7 @@ fun PlayerBar(
     progressString: String,
 ) {
     PlayerBarContent(
+        modifier =  modifier,
         progress = progress,
         onProgress = onProgress,
         audio = audio,
@@ -45,6 +48,7 @@ fun PlayerBar(
 
 @Composable
 private fun PlayerBarContent(
+    modifier: Modifier = Modifier,
     progress: Float = 0f,
     onProgress: (Float) -> Unit = {},
     progressString: String = "00:00",
@@ -55,7 +59,7 @@ private fun PlayerBarContent(
     onPrevious: () -> Unit = {},
 ) {
     ElevatedCard(
-        modifier = Modifier.height(144.dp),
+        modifier = modifier,
     ) {
         Column(
             modifier = Modifier
@@ -78,6 +82,7 @@ private fun PlayerBarContent(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 MediaDisplay(
+                    modifier = Modifier.fillMaxWidth(0.7f),
                     audio = audio,
                     progress = progress,
                     onProgress = onProgress,
